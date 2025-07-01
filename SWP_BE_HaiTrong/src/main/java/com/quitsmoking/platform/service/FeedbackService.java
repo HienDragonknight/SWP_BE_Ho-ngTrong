@@ -2,6 +2,7 @@ package com.quitsmoking.platform.service;
 
 import com.quitsmoking.platform.dto.FeedbackRequest;
 import com.quitsmoking.platform.dto.FeedbackResponse;
+import com.quitsmoking.platform.dto.FeedbackUpdateRequest;
 import com.quitsmoking.platform.entity.*;
 import com.quitsmoking.platform.entity.Blog;
 import com.quitsmoking.platform.repository.AccountRepository;
@@ -60,5 +61,30 @@ public class FeedbackService  {
                         fb.getComment(),
                         fb.getCreatedAt()))
                 .toList();
+    }
+
+    public FeedbackResponse updateFeedback(FeedbackUpdateRequest request) {
+        Feedback feedback = feedbackRepo.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("Feedback not found"));
+
+        feedback.setRating(request.getRating());
+        feedback.setComment(request.getComment());
+        // Nếu muốn cập nhật thời gian sửa:
+        feedback.setCreatedAt(LocalDateTime.now());
+
+        feedbackRepo.save(feedback);
+
+        return new FeedbackResponse(
+                feedback.getAccount().getFullName(),
+                feedback.getRating(),
+                feedback.getComment(),
+                feedback.getCreatedAt()
+        );
+    }
+
+    public void deleteFeedback(Long id) {
+        Feedback feedback = feedbackRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Feedback not found"));
+        feedbackRepo.delete(feedback);
     }
 }
